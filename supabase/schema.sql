@@ -50,3 +50,5 @@ revoke execute on function private.notify_event() from public,anon,authenticated
 revoke execute on function private.is_admin() from public,anon;
 grant execute on function private.is_admin() to authenticated;
 create index on posts(author);create index on posts(created_at desc);create index on comments(post);create index on likes(actor);create index on follows(target);create index on messages(sender);create index on messages(recipient);create index on notifications(recipient);create index on reports(post);create index on reports(actor);create index on comments(actor);
+
+alter table public.profiles add column if not exists avatar_url text check(length(avatar_url)<=2048);
