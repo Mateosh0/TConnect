@@ -1,0 +1,12 @@
+alter table public.profiles add column discovery_city text not null default '' check(length(discovery_city)<=80),add column discovery_enabled boolean not null default false;
+grant update(discovery_city,discovery_enabled) on public.profiles to authenticated;
+create table public.creator_drafts(id uuid primary key default gen_random_uuid(),owner uuid not null references public.profiles(id) on delete cascade,body text not null check(length(body) between 1 and 500),created_at timestamptz not null default now());
+alter table public.creator_drafts enable row level security;
+revoke all on public.creator_drafts from anon,authenticated;
+grant select,delete on public.creator_drafts to authenticated;
+grant insert(owner,body) on public.creator_drafts to authenticated;
+grant update(body) on public.creator_drafts to authenticated;
+create policy draft_read on public.creator_drafts for select to authenticated using(owner=auth.uid());
+create policy draft_add on public.creator_drafts for insert to authenticated with check(owner=auth.uid());
+create policy draft_edit on public.creator_drafts for update to authenticated using(owner=auth.uid()) with check(owner=auth.uid());
+create policy draft_delete on public.creator_drafts for delete to authenticated using(owner=auth.uid());
