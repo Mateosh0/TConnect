@@ -52,3 +52,5 @@ grant execute on function private.is_admin() to authenticated;
 create index on posts(author);create index on posts(created_at desc);create index on comments(post);create index on likes(actor);create index on follows(target);create index on messages(sender);create index on messages(recipient);create index on notifications(recipient);create index on reports(post);create index on reports(actor);create index on comments(actor);
 
 alter table public.profiles add column if not exists avatar_url text check(length(avatar_url)<=2048);
+
+alter table public.profiles add column if not exists interests text not null default '' check(char_length(interests)<=200), add column if not exists website text not null default '' check(char_length(website)<=500 and (website='' or website ~ '^https?://[^[:space:]]+$')), add column if not exists featured text not null default '' check(char_length(featured)<=500 and (featured='' or featured ~ '^https?://[^[:space:]]+$')); grant update(username,interests,website,featured) on public.profiles to authenticated;
