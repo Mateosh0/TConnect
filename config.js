@@ -1,2 +1,2 @@
-export const URL = 'https://YOUR_PROJECT.supabase.co';
-export const ANON_KEY = 'YOUR_ANON_KEY';
+export const URL = 'https://xhcmdumebveoewbxacfe.supabase.co';
+export const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoY21kdW1lYnZlb2V3YnhhY2ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU2MjEzMjksImV4cCI6MjExMTE5NzMyOX0.qkL1filfaJOpAYXunWEEU83J4JfZYgCUHpPEeGeH-Xo";
