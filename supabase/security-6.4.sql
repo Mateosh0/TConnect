@@ -1,0 +1,18 @@
+create table public.support_tickets(id uuid primary key default gen_random_uuid(),owner uuid not null references public.profiles(id),subject text not null check(length(subject) between 1 and 100),body text not null check(length(body) between 1 and 2000),answer text check(length(answer)<=2000),closed boolean not null default false,created_at timestamptz not null default now());
+create table public.moderation_log(id uuid primary key default gen_random_uuid(),actor uuid not null references public.profiles(id),target uuid not null references public.profiles(id),action text not null,created_at timestamptz not null default now());
+alter table public.support_tickets enable row level security;
+alter table public.moderation_log enable row level security;
+revoke all on public.support_tickets,public.moderation_log from anon,authenticated;
+grant select on public.support_tickets,public.moderation_log to authenticated;
+grant insert(owner,subject,body) on public.support_tickets to authenticated;
+grant update(answer,closed) on public.support_tickets to authenticated;
+create policy support_read on public.support_tickets for select to authenticated using(owner=auth.uid() or private.is_admin());
+create policy support_create on public.support_tickets for insert to authenticated with check(owner=auth.uid());
+create policy support_answer on public.support_tickets for update to authenticated using(private.is_admin()) with check(private.is_admin());
+create policy modlog_read on public.moderation_log for select to authenticated using(private.is_admin());
+create function private.verify_profile_admin(target_id uuid,enabled boolean) returns void language plpgsql security definer set search_path='' as $$begin if auth.uid() is null or not private.is_admin() then raise exception 'Forbidden'; end if; update public.profiles set verified=enabled where id=target_id; if not found then raise exception 'Profile not found'; end if; insert into public.moderation_log(actor,target,action) values(auth.uid(),target_id,case when enabled then 'verified' else 'unverified' end); end;$$;
+revoke all on function private.verify_profile_admin(uuid,boolean) from public,anon;
+grant execute on function private.verify_profile_admin(uuid,boolean) to authenticated;
+create function public.verify_profile_admin(target_id uuid,enabled boolean) returns void language sql security invoker set search_path='' as $$select private.verify_profile_admin(target_id,enabled)$$;
+revoke all on function public.verify_profile_admin(uuid,boolean) from public,anon;
+grant execute on function public.verify_profile_admin(uuid,boolean) to authenticated;
